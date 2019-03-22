@@ -1,0 +1,38 @@
+apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
+
+sourceCompatibility = 1.8
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Vendor': 'Alexander Burchak',
+                'Implementation-Title': 'IssueTracker Test',
+                'Implementation-Version': version,
+                'Built-Date': builtDate,
+                'Built-By': builtBy,
+                'Built-JDK': builtJDK,
+                'Built-Host': builtHost
+    }
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    compile "org.testng:testng:${testngVersion}"
+    compile ("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "junit", module: "junit"
+    }
+    compile "org.testcontainers:testcontainers:${testcontainersVersion}"
+    compile "org.testcontainers:mysql:${testcontainersVersion}"
+}
+
+test {
+    useTestNG()
+}

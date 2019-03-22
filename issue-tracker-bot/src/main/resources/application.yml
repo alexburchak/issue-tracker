@@ -1,0 +1,13 @@
+server:
+  servlet:
+    context-path: /issue-tracker-bot
+
+spring:
+  application:
+    name: issue-tracker-bot
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+issue-tracker-bot:
+  api-key: ${TELEGRAM_API_KEY}

@@ -1,0 +1,116 @@
+import net.researchgate.release.GitAdapter
+import java.util.regex.Matcher
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.7.0'
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+allprojects {
+    group = 'org.alexburchak.issuetracker'
+    version = rootProject.file('version.properties').text.replace('version=', '')
+
+    ext {
+        springBootVersion = '2.1.3.RELEASE'
+
+        lombokVersion = '1.18.4'
+        testngVersion = '6.14.3'
+        httpClientVersion = '4.5.6'
+        javaTelegramBotApiVersion = '4.1.0'
+        mockitoVersion = '2.23.4'
+        springSessionVersion = '2.1.4.RELEASE'
+        testcontainersVersion = '1.10.6'
+        jacksonVersion = '2.3.0'
+
+        builtDate = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        builtBy = System.getProperty('user.name')
+        builtJDK = System.getProperty('java.version')
+        builtHost = InetAddress.getLocalHost().getHostName()
+    }
+
+    tasks.whenTaskAdded { task ->
+        if (task.name.endsWith("test") && Boolean.getBoolean('skipTests')
+                || task.name.equals("itest") && Boolean.getBoolean('skipITs')) {
+            task.enabled = false
+        }
+    }
+}
+
+subprojects {
+    apply plugin:'java'
+    apply plugin: 'jacoco'
+
+    buildscript {
+        repositories {
+            mavenCentral()
+            jcenter()
+            maven { url "https://repo.spring.io/snapshot" }
+            maven { url "https://repo.spring.io/milestone" }
+        }
+        dependencies {
+            classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+
+    lombok {
+        version = '1.18.4'
+        sha256 = ""
+    }
+
+    jacoco {
+        toolVersion = "0.8.2"
+    }
+    
+    test {
+        useTestNG()
+    }
+
+    test.finalizedBy jacocoTestReport
+    check.dependsOn jacocoTestCoverageVerification
+}
+
+apply plugin:'base'
+
+evaluationDependsOnChildren()
+
+release {
+    preCommitText = ''
+    preTagCommitMessage = '[Gradle Release Plugin] - pre tag commit: '
+    tagCommitMessage = '[Gradle Release Plugin] - creating tag: '
+    newVersionCommitMessage = '[Gradle Release Plugin] - new version commit: '
+    tagTemplate = 'release-${version}'
+    versionPropertyFile = "${rootDir}/version.properties"
+    versionProperties = ['version']
+    buildTasks = ['build']
+    versionPatterns = [
+            /(\d+)([^\d]*$)/: { Matcher m, Project p -> m.replaceAll("${(m[0][1] as int) + 1}${m[0][2]}") }
+    ]
+    scmAdapters = [
+            GitAdapter
+    ]
+    git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+        commitVersionFileOnly = false
+        signTag = false
+    }
+}
+
+wrapper {
+    gradleVersion = '5.1'
+    distributionPath = 'wrapper/dists/issue-tracker'
+}

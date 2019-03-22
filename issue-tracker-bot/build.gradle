@@ -1,0 +1,96 @@
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+sourceCompatibility = 1.8
+
+bootJar {
+    manifest {
+        attributes 'Implementation-Vendor': 'Alexander Burchak',
+                'Implementation-Title': 'IssueTracker Bot',
+                'Implementation-Version': version,
+                'Built-Date': builtDate,
+                'Built-By': builtBy,
+                'Built-JDK': builtJDK,
+                'Built-Host': builtHost
+    }
+}
+
+dependencies {
+    compile project(':issue-tracker-data')
+    testCompile project(':issue-tracker-test')
+
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    compile "org.springframework.boot:spring-boot-starter"
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "org.springframework.boot:spring-boot-starter-validation"
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.session:spring-session-data-redis:${springSessionVersion}"
+
+    compile "com.github.pengrad:java-telegram-bot-api:${javaTelegramBotApiVersion}"
+
+    testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    testCompile "org.testng:testng:${testngVersion}"
+    testCompile ("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "junit", module: "junit"
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.5
+            }
+            excludes = [
+                    'org.alexburchak.issuetracker.bot.config.*Properties*',
+                    'org.alexburchak.issuetracker.bot.config.*Configuration*',
+                    'org.alexburchak.issuetracker.bot.IssueTrackerBotApplication',
+                    'org.alexburchak.issuetracker.bot.handler.action.*',
+            ]
+        }
+    }
+}
+
+processResources {
+    filesMatching(["**/*.properties", "**/*.txt"]) {
+        expand project.properties
+    }
+}
+
+sourceSets {
+    itest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        java {
+            srcDir file('src/itest/java')
+        }
+        resources {
+            srcDir file('src/itest/resources')
+        }
+    }
+}
+
+configurations {
+    itestCompile.extendsFrom testCompile
+    itestRuntime.extendsFrom testRuntime
+}
+
+task itest(type: Test) {
+    description = 'Run integration tests'
+    group "Verification"
+    dependsOn test
+
+    useTestNG()
+    testClassesDirs = sourceSets.itest.output.classesDirs
+    classpath = sourceSets.itest.runtimeClasspath
+    // jvmArgs '-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
+}
+
+compileJava.dependsOn processResources
+check.dependsOn itest

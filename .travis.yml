@@ -1,0 +1,17 @@
+language: java
+
+jdk:
+  - openjdk8
+
+script:
+  - "./gradlew build -DskipITs=true"
+
+deploy:
+  provider: cloudfoundry
+  username: alexburchak@gmail.com
+  password:
+    secure: 'dUlncg04jCO/UN7PfVisDFoWY5itD8zBCgzu2l8omRxjqG3WfIevFyinJufPflS3FeSNUQdN4IS0efmpfoqZN6ozf1jtgv+MBmlgy6cWWmr5foXws4f7NEh70zfUxm4qHjAvc57JeTXfev9gr0T310gn9Y/vOhEnZeaR3jmBlr1x4Vb+JPACk1jw5K0RciDp/Za8b4FbrKmShfrZqbxq6/Sooezuv1rqO3MGXs6nbm8oqg/TleQFUv6pnuR1xV/ggz0A0AC6TPuUpE3lv2rDhQq1VTvNcQft9xQNpRs7iC/lAf+n6ZACtz7ikVkgGjU1J0oldNy02Hqqb5V4k0G8/xGUA34nmx4erAAh1uFOYvEvD588qCKjQJXSpgwQkH6OZR4lwlvKHjpbhTR3989/dppPw7ZeqK/PKc+8N1RlO0X+J4+Slu5/fqU9fvn7CbSkO2xMcjgnvIqDicBylOWEVKxcCjf8JdYeXa09xKa4EWUDEZ7G+dg2JG/2lAqhL8DIyEKfUgQzYzz4EfqPsrwNxHsGMp/C5ct0sJIYlyHgZa4h2BYTBGaIDC3jcVBGpP8Ske477z2DgwOVe4TxbcJAJ6mRQrkI5U346vMYo6pPlfygtgzDqEK+Wf4nOZcEN0lnmBcWcyAodIIc9EfH0YbiFfIzWU/mX8dLJTkshk9fVmY='
+  api: https://api.run.pivotal.io
+  organization: alexburchak.org
+  space: development
+  app_name: issue-tracker-bot

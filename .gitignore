@@ -1,0 +1,11 @@
+.gitignore
+
+/.gradle/
+gradle.properties
+issue-tracker-bot*.log
+
+/.idea/
+*.iml
+
+build/
+out/

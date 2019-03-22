@@ -1,0 +1,5 @@
+rootProject.name = 'IssueTracker'
+
+include 'issue-tracker-bot'
+include 'issue-tracker-data'
+include 'issue-tracker-test'
